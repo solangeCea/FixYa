@@ -1,18 +1,80 @@
 -- REGIONES
 INSERT INTO region (id_region, nombre_region)
 VALUES
-(1, 'Biobío')
+(1, 'Tarapacá'),
+(2, 'Antofagasta'),
+(3, 'Atacama'),
+(4, 'Coquimbo'),
+(5, 'Valparaíso'),
+(6, 'Metropolitana'),
+(7, 'O’Higgins'),
+(8, 'Maule'),
+(9, 'Ñuble'),
+(10, 'Biobío'),
+(11, 'La Araucanía'),
+(12, 'Los Ríos'),
+(13, 'Los Lagos')
 ON CONFLICT (id_region) DO NOTHING;
 
 -- COMUNAS
-INSERT INTO comuna (id_comuna, nombre_comuna, region_id_region)
+INSERT INTO comuna (
+  id_comuna,
+  nombre_comuna,
+  region_id_region
+)
 VALUES
-(11, 'Concepción', 1),
-(12, 'Talcahuano', 1),
-(13, 'San Pedro de la Paz', 1)
-ON CONFLICT (id_comuna) DO NOTHING;
 
--- SERVICIOS
+-- TARAPACÁ
+(1, 'Iquique', 1),
+
+-- ANTOFAGASTA
+(2, 'Antofagasta', 2),
+(3, 'Calama', 2),
+
+-- ATACAMA
+(4, 'Copiapó', 3),
+
+-- COQUIMBO
+(5, 'La Serena', 4),
+(6, 'Coquimbo', 4),
+
+-- VALPARAÍSO
+(7, 'Valparaíso', 5),
+(8, 'Viña del Mar', 5),
+(9, 'Quilpué', 5),
+
+-- METROPOLITANA
+(10, 'Santiago', 6),
+(11, 'Providencia', 6),
+(12, 'Maipú', 6),
+(13, 'Puente Alto', 6),
+(14, 'Las Condes', 6),
+
+-- O’HIGGINS
+(15, 'Rancagua', 7),
+
+-- MAULE
+(16, 'Talca', 8),
+(17, 'Curicó', 8),
+
+-- ÑUBLE
+(18, 'Chillán', 9),
+
+-- BIOBÍO
+(19, 'Concepción', 10),
+(20, 'Talcahuano', 10),
+(21, 'San Pedro de la Paz', 10),
+(22, 'Los Ángeles', 10),
+
+-- ARAUCANÍA
+(23, 'Temuco', 11),
+
+-- LOS RÍOS
+(24, 'Valdivia', 12),
+
+-- LOS LAGOS
+(25, 'Puerto Montt', 13)
+ON CONFLICT (id_comuna) DO NOTHING;
 -- SERVICIOS
 INSERT INTO servicio (
   id_servicio,
