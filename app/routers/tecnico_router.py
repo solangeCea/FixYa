@@ -6,6 +6,7 @@ from app.models.resena import Resena
 from app.models.solicitud import Solicitud
 from sqlalchemy import desc
 from app.models.tecnico import Tecnico
+from app.models.usuario import Usuario
 from app.models.tecnico_comuna import TecnicoComuna
 from app.models.comuna import Comuna
 from app.models.tecnico_servicio import TecnicoServicio
@@ -53,6 +54,30 @@ def buscar_tecnicos_por_servicio_comuna(
     ).all()
 
     return tecnicos
+
+
+@router.get("/publicos/perfiles")
+def listar_perfiles_publicos_tecnicos(db: Session = Depends(get_db)):
+    tecnicos = db.query(Tecnico).join(
+        Usuario,
+        Usuario.rut == Tecnico.usuario_rut
+    ).filter(
+        Tecnico.tecnico_verificado == True
+    ).all()
+
+    return [
+        {
+            "usuario_rut": tecnico.usuario_rut,
+            "nombre_completo": tecnico.usuario.nombre_completo if tecnico.usuario else "Tecnico FixYa",
+            "correo": tecnico.usuario.correo if tecnico.usuario else None,
+            "telefono": tecnico.usuario.telefono if tecnico.usuario else None,
+            "descripcion_perfil": tecnico.descripcion_perfil,
+            "experiencia_anios": tecnico.experiencia_anios,
+            "nivel_tecnico": tecnico.nivel_tecnico,
+            "tecnico_verificado": tecnico.tecnico_verificado,
+        }
+        for tecnico in tecnicos
+    ]
 
 @router.get("/{rut}", response_model=TecnicoResponse)
 def obtener_tecnico(rut: str, db: Session = Depends(get_db)):
