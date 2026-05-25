@@ -35,6 +35,8 @@ class UsuarioOut(BaseModel):
     correo: str
     telefono: str
     tipo_usuario: str
+    comuna_id_comuna: int
+    estado_usuario: bool
 
     class Config:
         from_attributes = True
@@ -59,6 +61,15 @@ def crear_usuario(
     usuario: UsuarioCreate,
     db: Session = Depends(get_db)
 ):
+    usuario_existente = db.query(Usuario).filter(
+        (Usuario.rut == usuario.rut) | (Usuario.correo == usuario.correo)
+    ).first()
+
+    if usuario_existente:
+        raise HTTPException(
+            status_code=400,
+            detail="Ya existe un usuario con ese RUT o correo"
+        )
 
     nuevo_usuario = Usuario(
         rut=usuario.rut,

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 import os
@@ -7,6 +7,7 @@ from datetime import datetime
 
 from app.dependencies import solo_admin, solo_tecnico
 from app.database import get_db
+from app.models.usuario import Usuario
 from app.services import documento_tecnico_service
 from app.schemas.documento_tecnico_schema import (
     DocumentoTecnicoResponse,
@@ -29,6 +30,25 @@ def subir_documento_tecnico(
     current_user: dict = Depends(solo_tecnico),
     db: Session = Depends(get_db)
 ):
+    usuario = db.query(Usuario).filter(
+        Usuario.correo == current_user["correo"]
+    ).first()
+
+    if not usuario or usuario.rut != tecnico_usuario_rut:
+        raise HTTPException(
+            status_code=403,
+            detail="Solo puedes subir documentos para tu propio perfil tecnico"
+        )
+
+    extension = os.path.splitext(archivo.filename or "")[1].lower()
+    tipos_permitidos = {".pdf", ".jpg", ".jpeg", ".png"}
+
+    if extension not in tipos_permitidos:
+        raise HTTPException(
+            status_code=400,
+            detail="Archivo no permitido. Usa PDF, JPG o PNG"
+        )
+
     carpeta_destino = "uploads/documentos_tecnicos"
     os.makedirs(carpeta_destino, exist_ok=True)
 

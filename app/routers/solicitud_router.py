@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
 
-from app.dependencies import solo_admin, solo_tecnico, solo_cliente
+from app.dependencies import solo_tecnico, solo_cliente, requiere_rol
 
 from app.database import get_db
 from app.services import solicitud_service
@@ -11,6 +11,7 @@ from app.services import solicitud_service
 from app.models.solicitud import Solicitud
 from app.models.historial_solicitud import HistorialSolicitud
 from app.models.tecnico import Tecnico
+from app.models.usuario import Usuario
 
 from app.schemas.solicitud_schema import (
     SolicitudCreate,
@@ -82,8 +83,17 @@ def asignar_tecnico_solicitud(
     id_solicitud: int,
     rut_tecnico: str,
     db: Session = Depends(get_db),
-    usuario_actual: dict = Depends(solo_admin)
+    usuario_actual: dict = Depends(requiere_rol(["TECNICO"]))
 ):
+    usuario = db.query(Usuario).filter(
+        Usuario.correo == usuario_actual["correo"]
+    ).first()
+
+    if not usuario or usuario.rut != rut_tecnico:
+        raise HTTPException(
+            status_code=403,
+            detail="Solo puedes aceptar solicitudes para tu propio tecnico"
+        )
     
     solicitud = db.query(Solicitud).filter(
         Solicitud.id_solicitud == id_solicitud

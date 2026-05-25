@@ -8,6 +8,16 @@ from app.pdf.cotizacion_pdf import generar_pdf_cotizacion
 
 
 def crear_cotizacion(db: Session, data: CotizacionCreate):
+    solicitud = db.query(Solicitud).filter(
+        Solicitud.id_solicitud == data.solicitud_id_solicitud
+    ).first()
+
+    if not solicitud:
+        return None
+
+    if solicitud.tecnico_usuario_rut != data.tecnico_usuario_rut:
+        return "TECNICO_NO_ASIGNADO"
+
     nueva = Cotizacion(
         solicitud_id_solicitud=data.solicitud_id_solicitud,
         tecnico_usuario_rut=data.tecnico_usuario_rut,
@@ -21,16 +31,11 @@ def crear_cotizacion(db: Session, data: CotizacionCreate):
     db.commit()
     db.refresh(nueva)
 
-    solicitud = db.query(Solicitud).filter(
-        Solicitud.id_solicitud == data.solicitud_id_solicitud
-    ).first()
+    pdf_url = generar_pdf_cotizacion(nueva, solicitud)
+    nueva.archivo_pdf_url = pdf_url
 
-    if solicitud:
-        pdf_url = generar_pdf_cotizacion(nueva, solicitud)
-        nueva.archivo_pdf_url = pdf_url
-
-        db.commit()
-        db.refresh(nueva)
+    db.commit()
+    db.refresh(nueva)
 
     return nueva
 
@@ -84,6 +89,20 @@ def aceptar_cotizacion(db: Session, id_cotizacion: int):
         solicitud.tecnico_usuario_rut = cotizacion.tecnico_usuario_rut
         solicitud.estado_trabajo = "ASIGNADO"
         solicitud.fecha_asignacion = datetime.now()
+
+    db.commit()
+    db.refresh(cotizacion)
+    return cotizacion
+
+
+def rechazar_cotizacion(db: Session, id_cotizacion: int, motivo: str = "Rechazada por cliente"):
+    cotizacion = obtener_cotizacion(db, id_cotizacion)
+
+    if not cotizacion:
+        return None
+
+    cotizacion.estado_cotizacion = "RECHAZADA"
+    cotizacion.motivo_anulacion = motivo
 
     db.commit()
     db.refresh(cotizacion)
