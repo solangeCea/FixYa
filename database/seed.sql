@@ -23,58 +23,33 @@ INSERT INTO comuna (
   region_id_region
 )
 VALUES
-
--- TARAPACÁ
 (1, 'Iquique', 1),
-
--- ANTOFAGASTA
 (2, 'Antofagasta', 2),
 (3, 'Calama', 2),
-
--- ATACAMA
 (4, 'Copiapó', 3),
-
--- COQUIMBO
 (5, 'La Serena', 4),
 (6, 'Coquimbo', 4),
-
--- VALPARAÍSO
 (7, 'Valparaíso', 5),
 (8, 'Viña del Mar', 5),
 (9, 'Quilpué', 5),
-
--- METROPOLITANA
 (10, 'Santiago', 6),
 (11, 'Providencia', 6),
 (12, 'Maipú', 6),
 (13, 'Puente Alto', 6),
 (14, 'Las Condes', 6),
-
--- O’HIGGINS
 (15, 'Rancagua', 7),
-
--- MAULE
 (16, 'Talca', 8),
 (17, 'Curicó', 8),
-
--- ÑUBLE
 (18, 'Chillán', 9),
-
--- BIOBÍO
 (19, 'Concepción', 10),
 (20, 'Talcahuano', 10),
 (21, 'San Pedro de la Paz', 10),
 (22, 'Los Ángeles', 10),
-
--- ARAUCANÍA
 (23, 'Temuco', 11),
-
--- LOS RÍOS
 (24, 'Valdivia', 12),
-
--- LOS LAGOS
 (25, 'Puerto Montt', 13)
 ON CONFLICT (id_comuna) DO NOTHING;
+
 -- SERVICIOS
 INSERT INTO servicio (
   id_servicio,
@@ -112,14 +87,15 @@ VALUES (
   '999999999',
   '$2y$12$yRSpEk4TrjXeHrte.UhMrOCTSTy2G8N.xVuKPs7k0isZpnic46q8q',
   true,
-  11,
+  19,
   'ADMIN'
 )
 ON CONFLICT (rut) DO UPDATE SET
   correo = EXCLUDED.correo,
   contrasena = EXCLUDED.contrasena,
   tipo_usuario = EXCLUDED.tipo_usuario,
-  estado_usuario = EXCLUDED.estado_usuario;
+  estado_usuario = EXCLUDED.estado_usuario,
+  comuna_id_comuna = EXCLUDED.comuna_id_comuna;
 
 -- USUARIO CLIENTE
 -- Contraseña real: cliente123
@@ -144,14 +120,15 @@ VALUES (
   '988888888',
   '$2y$12$89AnaEY3u/onkdv1JG2zr.meugUfo2ZtkvyguDtE4u8rJk3Q8zP5.',
   true,
-  11,
+  19,
   'CLIENTE'
 )
 ON CONFLICT (rut) DO UPDATE SET
   correo = EXCLUDED.correo,
   contrasena = EXCLUDED.contrasena,
   tipo_usuario = EXCLUDED.tipo_usuario,
-  estado_usuario = EXCLUDED.estado_usuario;
+  estado_usuario = EXCLUDED.estado_usuario,
+  comuna_id_comuna = EXCLUDED.comuna_id_comuna;
 
 -- USUARIO TÉCNICO
 -- Contraseña real: tecnico123
@@ -176,14 +153,15 @@ VALUES (
   '977777777',
   '$2y$12$7MKIL5rQJ8sekD8SZrfQZ.zNnxsVRjkswP0G49986PzfB9dZl9CfG',
   true,
-  11,
+  19,
   'TECNICO'
 )
 ON CONFLICT (rut) DO UPDATE SET
   correo = EXCLUDED.correo,
   contrasena = EXCLUDED.contrasena,
   tipo_usuario = EXCLUDED.tipo_usuario,
-  estado_usuario = EXCLUDED.estado_usuario;
+  estado_usuario = EXCLUDED.estado_usuario,
+  comuna_id_comuna = EXCLUDED.comuna_id_comuna;
 
 -- TÉCNICO
 INSERT INTO tecnico (
@@ -200,7 +178,11 @@ VALUES (
   'Senior',
   true
 )
-ON CONFLICT (usuario_rut) DO NOTHING;
+ON CONFLICT (usuario_rut) DO UPDATE SET
+  descripcion_perfil = EXCLUDED.descripcion_perfil,
+  experiencia_anios = EXCLUDED.experiencia_anios,
+  nivel_tecnico = EXCLUDED.nivel_tecnico,
+  tecnico_verificado = EXCLUDED.tecnico_verificado;
 
 -- TÉCNICO SERVICIO
 INSERT INTO tecnico_servicio (
@@ -220,6 +202,6 @@ INSERT INTO tecnico_comuna (
 )
 VALUES (
   '12311111-1',
-  11
+  19
 )
 ON CONFLICT DO NOTHING;
