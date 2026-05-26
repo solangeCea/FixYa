@@ -12,6 +12,7 @@ from app.models.solicitud import Solicitud
 from app.models.historial_solicitud import HistorialSolicitud
 from app.models.tecnico import Tecnico
 from app.models.usuario import Usuario
+from app.models.notificacion import Notificacion
 
 from app.schemas.solicitud_schema import (
     SolicitudCreate,
@@ -124,6 +125,12 @@ def asignar_tecnico_solicitud(
     )
 
     db.add(historial)
+    db.add(Notificacion(
+        usuario_rut=solicitud.usuario_rut,
+        titulo="Solicitud aceptada",
+        mensaje=f"Un tecnico acepto tu solicitud: {solicitud.titulo_solicitud}",
+        tipo="SOLICITUD"
+    ))
     db.commit()
     db.refresh(solicitud)
 

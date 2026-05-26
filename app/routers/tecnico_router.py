@@ -10,6 +10,7 @@ from app.models.usuario import Usuario
 from app.models.tecnico_comuna import TecnicoComuna
 from app.models.comuna import Comuna
 from app.models.tecnico_servicio import TecnicoServicio
+from app.models.servicio import Servicio
 
 from app.database import get_db
 from app.schemas.tecnico_schema import TecnicoCreate, TecnicoUpdate, TecnicoResponse
@@ -67,6 +68,40 @@ def listar_perfiles_publicos_tecnicos(db: Session = Depends(get_db)):
 
     return [
         {
+            "promedio_calificacion": round(float(db.query(
+                func.avg(Resena.calificacion)
+            ).join(
+                Solicitud,
+                Solicitud.id_solicitud == Resena.solicitud_id_solicitud
+            ).filter(
+                Solicitud.tecnico_usuario_rut == tecnico.usuario_rut,
+                Resena.resena_activa == "S"
+            ).scalar() or 0), 1),
+            "total_resenas": db.query(Resena).join(
+                Solicitud,
+                Solicitud.id_solicitud == Resena.solicitud_id_solicitud
+            ).filter(
+                Solicitud.tecnico_usuario_rut == tecnico.usuario_rut,
+                Resena.resena_activa == "S"
+            ).count(),
+            "servicios": [
+                servicio.nombre_servicio
+                for servicio in db.query(Servicio).join(
+                    TecnicoServicio,
+                    Servicio.id_servicio == TecnicoServicio.servicio_id_servicio
+                ).filter(
+                    TecnicoServicio.tecnico_usuario_rut == tecnico.usuario_rut
+                ).all()
+            ],
+            "comunas": [
+                comuna.nombre_comuna
+                for comuna in db.query(Comuna).join(
+                    TecnicoComuna,
+                    Comuna.id_comuna == TecnicoComuna.comuna_id_comuna
+                ).filter(
+                    TecnicoComuna.tecnico_usuario_rut == tecnico.usuario_rut
+                ).all()
+            ],
             "usuario_rut": tecnico.usuario_rut,
             "nombre_completo": tecnico.usuario.nombre_completo if tecnico.usuario else "Tecnico FixYa",
             "correo": tecnico.usuario.correo if tecnico.usuario else None,

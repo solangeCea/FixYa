@@ -5,6 +5,7 @@ from app.models.usuario import Usuario
 from app.models.tecnico import Tecnico
 from app.models.solicitud import Solicitud
 from app.models.resena import Resena
+from app.models.cotizacion import Cotizacion
 
 
 def obtener_dashboard_admin(db: Session):
@@ -34,6 +35,14 @@ def obtener_dashboard_admin(db: Session):
         Solicitud.estado_trabajo == "INICIADO"
     ).count()
 
+    solicitudes_asignadas = db.query(Solicitud).filter(
+        Solicitud.estado_trabajo == "ASIGNADO"
+    ).count()
+
+    solicitudes_en_proceso = db.query(Solicitud).filter(
+        Solicitud.estado_trabajo == "EN_PROCESO"
+    ).count()
+
     solicitudes_finalizadas = db.query(Solicitud).filter(
         Solicitud.estado_trabajo == "FINALIZADO"
     ).count()
@@ -44,9 +53,16 @@ def obtener_dashboard_admin(db: Session):
 
     total_resenas = db.query(Resena).count()
 
-    resenas_reportadas = db.query(Resena).filter(
-        Resena.resena_reportada == "S"
+    resenas_activas = db.query(Resena).filter(
+        Resena.resena_activa == "S"
     ).count()
+
+    resenas_reportadas = db.query(Resena).filter(
+        Resena.resena_reportada == "S",
+        Resena.reporte_resuelto != "S"
+    ).count()
+
+    total_cotizaciones = db.query(Cotizacion).count()
 
     promedio = db.query(
         func.avg(Resena.calificacion)
@@ -61,9 +77,16 @@ def obtener_dashboard_admin(db: Session):
         "tecnicos_pendientes": tecnicos_pendientes,
         "total_solicitudes": total_solicitudes,
         "solicitudes_iniciadas": solicitudes_iniciadas,
+        "solicitudes_asignadas": solicitudes_asignadas,
+        "solicitudes_en_proceso": solicitudes_en_proceso,
+        "solicitudes_activas": (
+            solicitudes_iniciadas + solicitudes_asignadas + solicitudes_en_proceso
+        ),
         "solicitudes_finalizadas": solicitudes_finalizadas,
         "solicitudes_canceladas": solicitudes_canceladas,
         "total_resenas": total_resenas,
+        "resenas_activas": resenas_activas,
         "resenas_reportadas": resenas_reportadas,
+        "total_cotizaciones": total_cotizaciones,
         "promedio_general_calificaciones": round(promedio or 0, 2)
     }

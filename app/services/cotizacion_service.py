@@ -3,6 +3,7 @@ from datetime import datetime
 
 from app.models.cotizacion import Cotizacion
 from app.models.solicitud import Solicitud
+from app.models.notificacion import Notificacion
 from app.schemas.cotizacion_schema import CotizacionCreate, CotizacionUpdate
 from app.pdf.cotizacion_pdf import generar_pdf_cotizacion
 
@@ -33,6 +34,12 @@ def crear_cotizacion(db: Session, data: CotizacionCreate):
 
     pdf_url = generar_pdf_cotizacion(nueva, solicitud)
     nueva.archivo_pdf_url = pdf_url
+    db.add(Notificacion(
+        usuario_rut=solicitud.usuario_rut,
+        titulo="Nueva cotizacion",
+        mensaje=f"Recibiste una cotizacion por ${data.monto_estimado}",
+        tipo="COTIZACION"
+    ))
 
     db.commit()
     db.refresh(nueva)
@@ -89,6 +96,12 @@ def aceptar_cotizacion(db: Session, id_cotizacion: int):
         solicitud.tecnico_usuario_rut = cotizacion.tecnico_usuario_rut
         solicitud.estado_trabajo = "ASIGNADO"
         solicitud.fecha_asignacion = datetime.now()
+        db.add(Notificacion(
+            usuario_rut=cotizacion.tecnico_usuario_rut,
+            titulo="Cotizacion aceptada",
+            mensaje=f"El cliente acepto la cotizacion #{cotizacion.id_cotizacion}",
+            tipo="COTIZACION"
+        ))
 
     db.commit()
     db.refresh(cotizacion)

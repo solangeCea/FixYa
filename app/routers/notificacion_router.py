@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.notificacion import Notificacion
+from app.models.usuario import Usuario
 from app.schemas.notificacion_schema import NotificacionResponse
 
 
@@ -18,10 +19,15 @@ def listar_mis_notificaciones(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    usuario_rut = current_user.get("rut")
+    usuario = db.query(Usuario).filter(
+        Usuario.correo == current_user["correo"]
+    ).first()
+
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
 
     notificaciones = db.query(Notificacion).filter(
-        Notificacion.usuario_rut == usuario_rut
+        Notificacion.usuario_rut == usuario.rut
     ).order_by(
         Notificacion.fecha_creacion.desc()
     ).all()
@@ -35,11 +41,16 @@ def marcar_notificacion_como_leida(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    usuario_rut = current_user.get("rut")
+    usuario = db.query(Usuario).filter(
+        Usuario.correo == current_user["correo"]
+    ).first()
+
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
 
     notificacion = db.query(Notificacion).filter(
         Notificacion.id_notificacion == id_notificacion,
-        Notificacion.usuario_rut == usuario_rut
+        Notificacion.usuario_rut == usuario.rut
     ).first()
 
     if not notificacion:
@@ -64,10 +75,15 @@ def marcar_todas_como_leidas(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    usuario_rut = current_user.get("rut")
+    usuario = db.query(Usuario).filter(
+        Usuario.correo == current_user["correo"]
+    ).first()
+
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
 
     notificaciones = db.query(Notificacion).filter(
-        Notificacion.usuario_rut == usuario_rut,
+        Notificacion.usuario_rut == usuario.rut,
         Notificacion.leida == False
     ).all()
 
