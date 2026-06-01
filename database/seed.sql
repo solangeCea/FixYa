@@ -16,7 +16,7 @@ VALUES
 (13, 'Los Lagos')
 ON CONFLICT (id_region) DO NOTHING;
 
--- COMUNAS
+-- COMUNASS
 INSERT INTO comuna (
   id_comuna,
   nombre_comuna,
